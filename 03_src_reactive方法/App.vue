@@ -11,7 +11,7 @@
 </template>
 
 <script>
-	import { reactive } from "vue";
+	import { ref, reactive } from "vue";
 	export default {
 		name: "App",
 		setup() {
