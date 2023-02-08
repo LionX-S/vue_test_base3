@@ -132,3 +132,56 @@ $\quad\quad$ 2.setup不能是一个async函数，因为返回值不再是return�
   - ref定义的数据：操作数据需要```.value```,读取数据时模版中直接读取不需要```.value```。
   
   - reactive定义的数据：操作数据与读取数据均不需要```.value```。
+
+## 6.setup的两个注意点
+
+- setup的执行时机
+  
+  - 在beforeCreate之前执行一次，this是undefined
+
+- setup的参数
+  
+  - props：值为对象，包含：组件外部传递过来，且组件内部声明接收了的属性。
+  
+  - context：上下文对象
+    
+    - attrs：值为对象，包含组件外部传递过来，但没有在props配置中声明的属性，相当于```this.$sttrs```
+    
+    - slots:收到的插槽内容，相当于`this.$slots`
+    
+    - emit:分发自定义事件的函数，相当于`this.$emit`
+
+## 7.计算属性与监视
+
+### 1.computed函数
+
+- 与Vue2.x中computed配置功能一致
+
+- 写法
+  
+  ```javascript
+  import { reactive, computed } from "vue";
+      export default {
+          setup(props, context) {
+              let person = reactive({
+                  firstName: "",
+                  lastName: "",
+              });
+              function hello() {
+                  console.log("props====", props);
+                  context.emit("hello", "666");
+              }
+        // 计算属性——简写
+        let fullName = computed(() => {
+          return person.firstName + person.lastName;
+        })
+        // 计算属性——完整写法
+        // let fullName = computed({
+        //   get() {
+        //     return person.firstName + person.lastName;
+        //   },
+        //   set(value){
+  
+        //   }
+        // })
+  ```
