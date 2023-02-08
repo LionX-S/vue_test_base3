@@ -90,26 +90,26 @@ $\quad\quad$ 2.setup不能是一个async函数，因为返回值不再是return�
   - MDN文档中描述的Proxy与Reflect
     
     - Proxy：
+    
+    - Reflect：
       
-      - Reflect：
-        
-        ```javascript
-        new Proxy(data,{
-            //拦截读取属性值
-            get(target, prop){
-                return Reflect.get(target,prop)
-            }
-            //拦截设置属性值或添加新属性
-            set(target, prop, value) {
-                return Reflect.set(target, prop, value)
-            }
-            //拦截删除属性
-            deleteProperty(target, prop) {
-                return Reflect.deleteProperty(target, prop)
-            }
-        })
-        proxy.name='tom'
-        ```
+      ```javascript
+      new Proxy(data,{
+          //拦截读取属性值
+          get(target, prop){
+              return Reflect.get(target,prop)
+          }
+          //拦截设置属性值或添加新属性
+          set(target, prop, value) {
+              return Reflect.set(target, prop, value)
+          }
+          //拦截删除属性
+          deleteProperty(target, prop) {
+              return Reflect.deleteProperty(target, prop)
+          }
+      })
+      proxy.name='tom'
+      ```
 
 ## 5.reactive对比ref
 
@@ -145,7 +145,7 @@ $\quad\quad$ 2.setup不能是一个async函数，因为返回值不再是return�
   
   - context：上下文对象
     
-    - attrs：值为对象，包含组件外部传递过来，但没有在props配置中声明的属性，相当于```this.$sttrs```
+    - attrs：值为对象，包含组件外部传递过来，但没有在props配置中声明的属性，相当于```this.$attrs```
     
     - slots:收到的插槽内容，相当于`this.$slots`
     
@@ -185,3 +185,46 @@ $\quad\quad$ 2.setup不能是一个async函数，因为返回值不再是return�
         //   }
         // })
   ```
+
+### 2.watch函数
+
+- 与Vue2.x中的watch配置功能一致
+
+- 两个小‘坑’
+
+  **待验证**（不确定最新版vue3已经解决？）
+  
+  - 监视reactive定义的响应式数据时，oldValue无法正常获取、强制开启了深度监视（deep配置失效）
+  
+  - 监视reactive定义的响应式数据中某个属性时：deep配置有效。
+  
+  ```javascript
+  //情况一：监视ref定义的响应式数据
+  watch(sum, (newValue,oldValue) => {
+    console.log("sum变化",newValue,oldValue)
+  },{immediate:true})
+  //情况二：监视多个ref定义的响应式数据, 其中newValue与oldValue输出后也是数组
+  watch([sum,msg], (newValue,oldValue) => {
+    console.log("sum变化",newValue,oldValue)
+  },{immediate:true})
+  /*情况三：监视reactive所定义的一个响应式数据
+      1.注意：此处无法正确获取oldValue
+      2.注意：强制开启了深度监视（deep配置无效）
+  */
+  watch(person,(newValue,oldValue) => {
+    console.log('person变化了',newValue,oldValue)
+  },{deep:false})
+  //情况四：监视reactive所定义的一个响应式数据中的某个属性
+  watch(() => person.age,(newValue,oldValue) => {
+    console.log('person变化了',newValue,oldValue)
+  },{deep:false})
+  //情况五：监视reactive所定义的一些响应式数据中的某个属性
+  watch([() => person.age, () => person.name],(newValue,oldValue) => {
+    console.log('person变化了',newValue,oldValue)
+  },{deep:false})
+  //特殊情况,监视reactive中某个嵌套的对象时，如果这个对象中的属性值变化，不会捕捉到，需要开启deep才能捕捉到
+  watch(() => person.job,(newValue,oldValue) => {
+    console.log('person变化了',newValue,oldValue)
+  },{deep:true})
+  ```
+

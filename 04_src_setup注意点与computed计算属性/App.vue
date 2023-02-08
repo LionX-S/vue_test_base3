@@ -1,5 +1,5 @@
 <template>
-	<Demo/>
+	<Demo @hello="helloFun" testProps="测试props"/>
 </template>
 
 <script>
