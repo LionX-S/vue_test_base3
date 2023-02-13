@@ -335,3 +335,122 @@ $\quad\quad$ 2.setup不能是一个async函数，因为返回值不再是return�
 - isReactive：检查一个值是否由reactive创建的响应式代理
 - isReadonly：检查一个对象是否由readonly创建的只读代理
 - isProxy：检查一个对象是否由reactive或者readonly方法创建的代理
+
+# 四、Composition API的优势
+## 1.传统Options API存在的问题
+使用传统Option API中，新增或修改一个需求，就需要在data、methods、computed里修改
+## 2.Composition API的优势
+我们可以更加优雅的组织我们的代码，函数。让相关功能的代码更加有序的组织在一起。
+# 五、新的组件
+## 1.Fragment
+- 在vue2中，组件必须有一个跟标签
+- 在vue3中，组件可以没有跟标签，内部会将多个标签包含在一个Fragment虚拟元素中
+- 好处：减少标签层级，减少内存占用
+## 2.Teleport
+- 什么是Teleport?Teleport是一种能够将我们的组件html结构移动到指定位置的技术。
+  ```html
+  <teleport to="移动位置（这里写选择器）">
+    <div v-if="isShow" class="mask">
+      <div>内容</div>
+    </div>
+  </teleport>
+  ```
+## 3.Suspense
+- 等待异步组件渲染一些额外内容，让应用有更好的用户体验
+- 使用步骤
+  - 引入异步组件
+  ```javascript
+  import {defineAsyncComponent} from 'vue'
+  const child = defineAsyncComponent(() => import('./component/xxx'))
+  ```
+  - 使用Suspense包裹组件，并配置好default与fallback
+  ```html
+  <template>
+    <div class="app">
+      <h3>
+        我是APP组件
+      </h3>
+      <Suspense>
+        <template v-slot:default>
+          <child/>
+        </template>
+        <template v-slot:fallback>
+          <h2>loading...</h2>
+        </template>
+      </Suspense>
+    </div>
+  </template>
+  ```
+# 六、Vue3其他更改
+## 1.全局API的转移
+- Vue2.x有许多全局API和配置。
+  - 例如：注册全局组件、注册全局指令等。
+  ```javascript
+  //组册全局组件
+  Vue.component('MyButton',{
+    data: ()=> ({
+      count: 0
+    }),
+    template: '<button @click="count++">{{count}}</button>'
+  })
+  //注册全局指令
+  Vue.directive('focus',{
+    inserted: el => el.focus()
+  })
+  ```
+- Vue3.0中对这些api做出了调整：
+  - 将全局的API，即Vue.xxx调整到应用实例（app）上
+  
+  |  2.x全局API（Vue）   | 3.x实例API（app）|
+  |  ----  | ----  |
+  | Vue.config.xxx  | app.config.xxx |
+  | Vue.config.productionTip  | 移除了 |
+  | Vue.component | app.component|
+  | Vue.directive | app.directive |
+  | Vue.mixin | app.mixin |
+  | Vue.use | app.use |
+  | Vie.prototype | app.config.globalProperties |
+
+## 2.其他改变
+- data选项应始终被生命为一个函数
+- 过渡类名的更改
+  - Vue2.x写法
+  ```css
+  .v-enter,
+  .v-leave-to {
+    opacity: 0;
+  }
+  .v-leave,
+  .v-enter-to {
+    opacity: 0;
+  }
+  ```
+  -Vue3.x写法
+  ```css
+  .v-enter-from,
+  .v-leave-to {
+    opacity: 0;
+  }
+  .v-leave-from,
+  .v-enter-to {
+    opacity: 0;
+  }
+  ```
+- 移除keyCode作为v-on的修饰符，同时也不再支持config.keyCodes
+- 移除v-on.native修饰符
+  - 父组件中绑定事件
+  ```html
+  <my-component
+    v-on:close="handleComponentEvent"
+    v-on:click="handleNativeClickEvent"
+  />
+  ```
+  - 子组件中声明定义事件
+  ```javascript
+    <script>
+      export default {
+        emits:['close']
+      }
+    </script>
+  ```
+  - 移除过滤器
